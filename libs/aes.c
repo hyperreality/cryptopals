@@ -54,6 +54,31 @@ Bytes stripPKCS7(unsigned char *data, size_t data_len) {
   return (Bytes){res, out_len};
 }
 
+int validPKCS7(unsigned char *data, size_t data_len) {
+  unsigned char *res;
+
+  size_t pad_len = data[data_len - 1];
+
+  if (pad_len == 0 || pad_len > data_len)
+      return 0;
+
+  for (size_t i = 1; i < pad_len; i++) {
+    if (pad_len != data[data_len - 1 - i])
+      return 0;
+  }
+
+  return 1;
+}
+
+Bytes validateAndStrip(unsigned char *data, size_t data_len) {
+    Bytes out = {NULL, 0};
+
+    if (validPKCS7(data, data_len)) 
+        out = stripPKCS7(data, data_len);
+
+    return out;
+}
+
 Bytes aesEncryptECB(char *data, const size_t data_len, const unsigned char *key,
                     const size_t key_len) {
   Bytes out = {NULL, 0};
