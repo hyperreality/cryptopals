@@ -8,21 +8,21 @@ int main() {
     char *invalid = "ICE ICE BABY\x05\x05\x05\x05";
     char *invalid2 = "ICE ICE BABY\x01\x02\x03\x04";
 
-    Bytes stripped = validateAndStrip(valid, 16);
+    Bytes stripped = validateAndStrip((unsigned char *)valid, 16);
     if (stripped.data) {
         printf("%s\n", stripped.data);
     } else {
         printf("Invalid padding\n");
     }
 
-    stripped = validateAndStrip(invalid, 16);
+    stripped = validateAndStrip((unsigned char *)invalid, 16);
     if (stripped.data) {
         printf("%s\n", stripped.data);
     } else {
         printf("Invalid padding\n");
     }
 
-    stripped = validateAndStrip(invalid2, 16);
+    stripped = validateAndStrip((unsigned char *)invalid2, 16);
     if (stripped.data) {
         printf("%s\n", stripped.data);
     } else {
