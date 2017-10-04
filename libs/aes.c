@@ -226,7 +226,7 @@ Bytes aesDecryptCBC(unsigned char *data, size_t data_len, const unsigned char *k
     iv = (unsigned char *)(data + count);
   }
 
-  out = stripPKCS7(xorDecrypted, data_len);
+  out = validateAndStrip(xorDecrypted, data_len);
 
   free(decrypted);
   free(xorDecrypted);
