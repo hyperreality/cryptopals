@@ -36,7 +36,7 @@ int base64Encode(const char *inp, size_t inp_len, char **out) {
 int base64Decode(const char *src, size_t len, char **out) {
   unsigned char dtable[256], in[4], block[4], tmp;
   char *pos;
-  size_t i, count, olen;
+  size_t i, count, out_len;
 
   memset(dtable, 0x80, 256);
   for (i = 0; i < sizeof(base64_table); i++)
@@ -52,7 +52,7 @@ int base64Decode(const char *src, size_t len, char **out) {
   if (count % 4)
     return -1;
 
-  olen = count / 4 * 3;
+  out_len = count / 4 * 3;
   pos = *out = (char *)malloc(count);
   if (out == NULL)
     return -1;
@@ -75,11 +75,14 @@ int base64Decode(const char *src, size_t len, char **out) {
   }
 
   if (pos > *out) {
-    if (in[2] == '=')
+    if (in[2] == '=') {
+      out_len -= 2;
       pos -= 2;
-    else if (in[3] == '=')
+    } else if (in[3] == '=') {
+      out_len--;
       pos--;
+    }
   }
 
-  return olen;
+  return out_len;
 }
