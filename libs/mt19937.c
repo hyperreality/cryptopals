@@ -12,6 +12,7 @@ typedef struct {
 
 mt19937_state mt19937_initialise(uint32_t seed) {
   mt19937_state s;
+  memset(&s, 0, sizeof s);
 
   s.mt[0] = seed;
   for (size_t i = 1; i < N; i++)

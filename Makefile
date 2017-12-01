@@ -4,7 +4,7 @@ TARGETS=bin/01_base64 bin/02_fixed_xor bin/03_single_byte_xor bin/04_detect_sing
 	bin/09_pkcs7 bin/10_aes_cbc bin/11_aes_oracle bin/12_prepend_ecb bin/14_prepend_ecb_2 bin/15_strip_padding bin/16_cbc_bitflip \
 	bin/17_padding_oracle bin/18_aes_ctr bin/21_mersenne_twister
 
-CFLAGS=-std=c99 -Wall -Werror -Wextra -Wno-unused -pedantic -g
+CFLAGS=-std=c99 -Wall -Werror -Wextra -Wno-unused -pedantic -g -O3
 
 all: $(TARGETS) test
 
