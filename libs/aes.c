@@ -1,9 +1,13 @@
+#include <endian.h>
 #include <openssl/aes.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "xor.c"
+
+#define htole64(x) (x)
 
 typedef struct {
   unsigned char *data;
@@ -60,7 +64,7 @@ int validPKCS7(unsigned char *data, size_t data_len) {
   size_t pad_len = data[data_len - 1];
 
   if (pad_len == 0 || pad_len > data_len)
-      return 0;
+    return 0;
 
   for (size_t i = 1; i < pad_len; i++) {
     if (pad_len != data[data_len - 1 - i])
@@ -71,12 +75,12 @@ int validPKCS7(unsigned char *data, size_t data_len) {
 }
 
 Bytes validateAndStrip(unsigned char *data, size_t data_len) {
-    Bytes out = {NULL, 0};
+  Bytes out = {NULL, 0};
 
-    if (validPKCS7(data, data_len)) 
-        out = stripPKCS7(data, data_len);
+  if (validPKCS7(data, data_len))
+    out = stripPKCS7(data, data_len);
 
-    return out;
+  return out;
 }
 
 Bytes aesEncryptECB(char *data, const size_t data_len, const unsigned char *key,
@@ -116,8 +120,8 @@ Bytes aesEncryptECB(char *data, const size_t data_len, const unsigned char *key,
   return (Bytes){res, padded.len};
 }
 
-Bytes aesDecryptECB(const unsigned char *data, size_t data_len, const unsigned char *key,
-                    size_t key_len) {
+Bytes aesDecryptECB(const unsigned char *data, size_t data_len,
+                    const unsigned char *key, size_t key_len) {
   Bytes out = {NULL, 0};
 
   if (!data) {
@@ -141,7 +145,9 @@ Bytes aesDecryptECB(const unsigned char *data, size_t data_len, const unsigned c
     AES_ecb_encrypt(data + count, decrypted + count, &aesKey, AES_DECRYPT);
   }
 
-  out = stripPKCS7(decrypted, data_len);
+  if (data_len != 0)
+      out = stripPKCS7(decrypted, data_len);
+
   free(decrypted);
 
   return out;
@@ -188,8 +194,9 @@ Bytes aesEncryptCBC(char *data, const size_t data_len, const unsigned char *key,
   return (Bytes){res, padded.len};
 }
 
-Bytes aesDecryptCBC(unsigned char *data, size_t data_len, const unsigned char *key,
-                    size_t key_len, unsigned char *iv) {
+Bytes aesDecryptCBC(unsigned char *data, size_t data_len,
+                    const unsigned char *key, size_t key_len,
+                    unsigned char *iv) {
   Bytes out = {NULL, 0};
   unsigned char *xored = NULL;
 
@@ -233,6 +240,54 @@ Bytes aesDecryptCBC(unsigned char *data, size_t data_len, const unsigned char *k
   free(xored);
 
   return out;
+}
+
+union aes_ctr_counter {
+  unsigned char buf[AES_BLOCK_SIZE];
+
+  struct nonce_counter {
+    uint64_t nonce;
+    uint64_t counter;
+  } nc;
+};
+
+Bytes aesCTR(const unsigned char *data, size_t data_len,
+             const unsigned char *key, size_t key_len, const uint64_t nonce) {
+  Bytes out = {NULL, 0};
+  unsigned char keystream[AES_BLOCK_SIZE], *xored = NULL;
+
+  if (!data) {
+    printf("Error: aesDecryptCTR data input is NULL.\n");
+    return out;
+  } else if (!key) {
+    printf("Error: aesDecryptCTR key input is NULL.\n");
+    return out;
+  }
+
+  unsigned char *decrypted = calloc(data_len + 1, sizeof(unsigned char));
+  if (!decrypted) {
+    printf("Error: aesDecryptCTR could not allocate memory.\n");
+    return out;
+  }
+
+  AES_KEY aesKey;
+  AES_set_encrypt_key(key, key_len * 8, &aesKey);
+
+  union aes_ctr_counter ctr_counter = {.nc = {.counter = 0, .nonce = nonce}};
+
+  for (size_t count = 0; count < data_len; count += AES_BLOCK_SIZE) {
+    size_t block_len =
+        data_len - count < AES_BLOCK_SIZE ? data_len - count : AES_BLOCK_SIZE;
+
+    ctr_counter.nc.counter = htole64(count / AES_BLOCK_SIZE);
+    AES_ecb_encrypt(ctr_counter.buf, keystream, &aesKey, AES_ENCRYPT);
+    xor(keystream, block_len, data + count, block_len, &xored);
+
+    memcpy(decrypted + count, xored, block_len);
+  }
+  free(xored);
+
+  return (Bytes){decrypted, data_len};
 }
 
 char *aes_oracle(unsigned char *enc, size_t block_size) {
