@@ -2,7 +2,7 @@ default: all
 
 TARGETS=bin/01_base64 bin/02_fixed_xor bin/03_single_byte_xor bin/04_detect_single_char_xor bin/05_repeating_key_xor bin/06_break_repeated_key_xor bin/07_aes_ecb bin/08_detect_aes_cbc \
 	bin/09_pkcs7 bin/10_aes_cbc bin/11_aes_oracle bin/12_prepend_ecb bin/14_prepend_ecb_2 bin/15_strip_padding bin/16_cbc_bitflip \
-	bin/17_padding_oracle bin/18_aes_ctr bin/21_mersenne_twister bin/22_crack_mersenne
+	bin/17_padding_oracle bin/18_aes_ctr bin/21_mersenne_twister bin/22_crack_mersenne bin/23_clone_mersenne bin/24_mt19937_stream
 
 CFLAGS=-std=c99 -Wall -Werror -Wextra -Wno-unused -pedantic -g -O3
 
@@ -29,6 +29,8 @@ bin/17_padding_oracle: src/17_padding_oracle.c -lcrypto
 bin/18_aes_ctr: src/18_aes_ctr.c -lcrypto
 bin/21_mersenne_twister: src/21_mersenne_twister.c
 bin/22_crack_mersenne: src/22_crack_mersenne.c
+bin/23_clone_mersenne: src/23_clone_mersenne.c
+bin/24_mt19937_stream: src/24_mt19937_stream.c
 
 bin/%:
 	$(CC) -o $@ $^ $(CFLAGS) $(LDFLAGS)
