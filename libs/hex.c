@@ -65,3 +65,20 @@ int ASCIIToHex(const char *ascii, char **out) {
   return out_len;
 }
 
+int toHex(const unsigned char *data, size_t data_len, char **out) {
+  size_t out_len = data_len * 2;
+
+  *out = (char *)malloc(out_len + 1);
+  if (out == NULL)
+    return -1;
+
+  size_t i;
+  for (i = 0; i < data_len; i++) {
+    (*out)[i * 2] = hexDigit(data[i] / 0x10);
+    (*out)[i * 2 + 1] = hexDigit(data[i] % 0x10);
+  }
+
+  (*out)[i * 2] = 0;
+
+  return out_len;
+}
