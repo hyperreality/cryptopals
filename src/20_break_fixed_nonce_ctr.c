@@ -12,6 +12,8 @@
 #define NUM_LINES 40
 
 int main() {
+  srand(time(NULL));
+
   char line[LINE_LENGTH], *decoded = NULL;
   Bytes ciphers[NUM_LINES];
   int longest = 0;
