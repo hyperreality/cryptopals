@@ -3,7 +3,6 @@
 #include <time.h>
 
 #include "../libs/aes.c"
-#include "../libs/misc.c"
 #include "../libs/random.c"
 
 const unsigned char *key;

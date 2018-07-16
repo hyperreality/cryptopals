@@ -5,14 +5,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "misc.c"
 #include "xor.c"
 
 #define htole64(x) (x)
-
-typedef struct {
-  unsigned char *data;
-  size_t len;
-} Bytes;
 
 int nextBlock(int length, size_t block_size) {
   return (length + block_size) & ~(block_size - 1);
