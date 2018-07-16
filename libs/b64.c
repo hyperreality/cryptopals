@@ -77,10 +77,8 @@ int base64Decode(const char *src, size_t len, char **out) {
   if (pos > *out) {
     if (in[2] == '=') {
       out_len -= 2;
-      pos -= 2;
     } else if (in[3] == '=') {
       out_len--;
-      pos--;
     }
   }
 
